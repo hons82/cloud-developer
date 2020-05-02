@@ -2,6 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import {filterImageFromURL, deleteLocalFiles} from './util/util';
 
+const HttpStatus = require('http-status-codes');
 (async () => {
 
   // Init the Express application
@@ -31,6 +32,15 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
 
   //! END @TODO1
   
+  app.get("/filteredimage/", async (req, res) => {
+    const image_url = req.query.image_url as string;
+
+    // Check if the image url is present in the request
+    if (!image_url) {
+      res.sendStatus(HttpStatus.BAD_REQUEST).send(`image_url query parameter missing`);
+    }
+  });
+
   // Root Endpoint
   // Displays a simple message to the user
   app.get( "/", async ( req, res ) => {
