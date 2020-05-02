@@ -3,6 +3,8 @@ import bodyParser from 'body-parser';
 import {filterImageFromURL, deleteLocalFiles} from './util/util';
 
 const HttpStatus = require('http-status-codes');
+const isImageUrl = require('is-image-url');
+
 (async () => {
 
   // Init the Express application
@@ -13,12 +15,10 @@ const HttpStatus = require('http-status-codes');
   
   // Use the body parser middleware for post requests
   app.use(bodyParser.json());
-
-  // @TODO1 IMPLEMENT A RESTFUL ENDPOINT
+  
   // GET /filteredimage?image_url={{URL}}
   // endpoint to filter an image from a public url.
   // IT SHOULD
-  //    1
   //    1. validate the image_url query
   //    2. call filterImageFromURL(image_url) to filter the image
   //    3. send the resulting file in the response
@@ -30,8 +30,6 @@ const HttpStatus = require('http-status-codes');
 
   /**************************************************************************** */
 
-  //! END @TODO1
-  
   app.get("/filteredimage/", async (req, res) => {
     const image_url = req.query.image_url as string;
 
@@ -39,6 +37,11 @@ const HttpStatus = require('http-status-codes');
     if (!image_url) {
       res.sendStatus(HttpStatus.BAD_REQUEST).send(`image_url query parameter missing`);
     }
+
+    if (!isImageUrl(image_url)) {
+      res.sendStatus(HttpStatus.UNPROCESSABLE_ENTITY).send(`${image_url} is not an image`);
+    }
+
     try {
       const filteredpath = await filterImageFromURL(image_url);
       res.sendFile(filteredpath, () => deleteLocalFiles([filteredpath]));
