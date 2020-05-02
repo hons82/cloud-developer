@@ -39,6 +39,12 @@ const HttpStatus = require('http-status-codes');
     if (!image_url) {
       res.sendStatus(HttpStatus.BAD_REQUEST).send(`image_url query parameter missing`);
     }
+    try {
+      const filteredpath = await filterImageFromURL(image_url);
+      res.sendFile(filteredpath, () => deleteLocalFiles([filteredpath]));
+    } catch(error) {
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ error, message: 'Oh no...' });
+    }
   });
 
   // Root Endpoint
