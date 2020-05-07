@@ -7,9 +7,11 @@ import bodyParser from 'body-parser';
 import { config } from './config/config';
 import { V0MODELS } from './controllers/v0/model.index';
 
-const c = config.dev;
+const c = config.url;
 
 (async () => {
+  require('dotenv').config()
+
   await sequelize.addModels(V0MODELS);
   await sequelize.sync();
 
@@ -35,7 +37,7 @@ const c = config.dev;
 
   // Start the Server
   app.listen( port, () => {
-      console.log( `server running ` + c.url );
+      console.log( `server running http://localhost:` + port );
       console.log( `press CTRL+C to stop server` );
   } );
 })();
