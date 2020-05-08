@@ -12,27 +12,27 @@ spec:
         service: backend-feed
     spec:
       containers:
-      - image: scheele/udacity-restapi-feed
+      - image: hons82/udacity-restapi-feed
         name: backend-feed
         imagePullPolicy: Always  
         resources:
           requests:
             memory: "64Mi"
-            cpu: "250m"
+            cpu: "50m"
           limits:
             memory: "1024Mi"
-            cpu: "500m"                  
+            cpu: "100m"
         env:
         - name: URL
           valueFrom:
             configMapKeyRef:
               name: env-config
               key: URL
-        - name: AWS_BUCKET
+        - name: AWS_MEDIA_BUCKET
           valueFrom:
             configMapKeyRef:
               name: env-config
-              key: AWS_BUCKET
+              key: AWS_MEDIA_BUCKET
         - name: AWS_PROFILE
           valueFrom:
             configMapKeyRef:
@@ -48,26 +48,26 @@ spec:
             configMapKeyRef:
               name: env-config
               key: JWT_SECRET
-        - name: POSTGRESS_DB
+        - name: POSTGRES_DATABASE
           valueFrom:
             configMapKeyRef:
               name: env-config
-              key: POSTGRESS_DB
-        - name: POSTGRESS_HOST
+              key: POSTGRES_DATABASE
+        - name: POSTGRES_HOST
           valueFrom:
             configMapKeyRef:
               name: env-config
-              key: POSTGRESS_HOST
-        - name: POSTGRESS_PASSWORD
+              key: POSTGRES_HOST
+        - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
               name: env-secret
-              key: POSTGRESS_PASSWORD
-        - name: POSTGRESS_USERNAME
+              key: POSTGRES_PASSWORD
+        - name: POSTGRES_USERNAME
           valueFrom:
             secretKeyRef:
               name: env-secret
-              key: POSTGRESS_USERNAME      
+              key: POSTGRES_USERNAME      
         volumeMounts:
         - name: aws-secret
           mountPath: "/root/.aws/"
