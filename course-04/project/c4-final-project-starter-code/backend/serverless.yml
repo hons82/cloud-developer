@@ -28,6 +28,7 @@ provider:
   environment:
     TODOS_TABLE: Todos-${self:provider.stage}
     USER_ID_INDEX: UserIdIndex
+    GLOBAL_USER_ID_INDEX: GlobalUserIdIndex
     IMAGES_S3_BUCKET: images-1234567890-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
 
@@ -81,8 +82,8 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
-          - dynamodb:Scan
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+          - dynamodb:Query
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}/index/${self:provider.environment.GLOBAL_USER_ID_INDEX}
 
   CreateTodo:
     handler: src/lambda/http/createTodo.handler
@@ -215,6 +216,15 @@ resources:
               - AttributeName: todoId
                 KeyType: HASH
               - AttributeName: userId
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL # What attributes will be copied to an index
+        GlobalSecondaryIndexes:
+          - IndexName: ${self:provider.environment.GLOBAL_USER_ID_INDEX}
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
+              - AttributeName: createdAt
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL # What attributes will be copied to an index

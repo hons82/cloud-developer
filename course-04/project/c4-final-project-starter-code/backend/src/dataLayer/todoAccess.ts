@@ -3,9 +3,12 @@ import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 
 import { TodoItem } from '../models/TodoItem';
 import { TodoUpdate } from '../models/TodoUpdate';
+import { createLogger } from '../utils/logger';
 
 const AWSXRay = require('aws-xray-sdk');
 const XAWS = AWSXRay.captureAWS(AWS);
+
+const logger = createLogger('todoAccess');
 
 function createDynamoDBClient(): DocumentClient {
     if (process.env.IS_OFFLINE) {
@@ -22,20 +25,23 @@ export class TodoAccess {
         private readonly docClient: DocumentClient = createDynamoDBClient(),
         private readonly todosTable = process.env.TODOS_TABLE,
         private readonly userIdIndex = process.env.USER_ID_INDEX,
+        private readonly globalUserIdIndex = process.env.GLOBAL_USER_ID_INDEX,
     ) { }
 
     public async getAllTodos(userId: string): Promise<TodoItem[]> {
-        const result = await this.docClient.scan({
-            TableName: this.todosTable,
-            FilterExpression: 'userId = :userId',
-            ExpressionAttributeValues: {
-                ':userId': userId,
-            },
-        }).promise();
-
+        logger.info('get all todos for user %s (Index: %s)', userId, this.globalUserIdIndex);
+        const result = await this.docClient.query({
+          TableName: this.todosTable,
+          IndexName: this.globalUserIdIndex,
+          KeyConditionExpression: 'userId = :userId',
+          ExpressionAttributeValues: {
+            ':userId': userId,
+          }
+        }).promise()
+    
         const items = result.Items;
         return items as TodoItem[];
-    }
+      }
 
     public async getTodo(todoId: string, userId: string): Promise<TodoItem> {
         const result = await this.docClient.query({
